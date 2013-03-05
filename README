@@ -1,0 +1,21 @@
+settings:
+
+```python
+RK_MERCHANT_LOGIN = "merchant login"
+RK_MERCHANT_PASS1 = "password1"
+RK_MERCHANT_PASS2 = "password2"
+RK_DESCRIPTION_TPL = "muzmates.com payment"
+RK_DEFAULT_CURRENCY = "USD"
+RK_DEFAULT_LANGUAGE = "en"
+RK_RESULT_URL_METHOD = "GET"
+RK_SUCCESS_URL_METHOD = "GET"
+RK_FAIL_URL_METHOD = "GET"
+RK_SUCCESS_URL = "success case redirect"
+RK_FAIL_URL = "failure redirect"
+```
+
+Settings in robokassa cabinet:
+
+Result URL: http://yourserver/{RK_URL_PREFIX}/result
+Success URL: http://yourserver/{RK_URL_PREFIX}/success
+Fail URL: http://yourserver/{RK_URL_PREFIX}/fail
