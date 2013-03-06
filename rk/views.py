@@ -15,6 +15,7 @@ from django.utils.timezone import now
 
 from rk import lib
 from models import Transaction
+from hooks import RKBaseHook
 
 log = logging.getLogger(__name__)
 
@@ -24,19 +25,13 @@ def init(req):
     Required params can be passed using etiher GET or POST
     """
 
-    # 1. Try to get required params
-    if req.method == "POST":
-        data = req.POST
-    elif req.method == "GET":
-        data = req.GET
-    else:
-        log.error("Invalid HTTP method: %s. GET or POST expected", req.method)
+    data = req.POST
 
-        return HttpResponseNotAllowed(["GET", "POST"])
-
-    # 2. Create transaction and get redirect URL
+    # 2. Create transaction and redirect URL
     try:
         url = lib.init(data)
+
+        get_hook().on_init(data)
 
         return redirect(url)
     except Exception as e:
@@ -56,26 +51,18 @@ def result(req):
     * SignatureValue
     """
 
-    data = req.GET if settings.RK_RESULT_URL_METHOD == "GET" else req.POST
-
-    amount = data.get("OutSum", None)
-    inv_id = data.get("InvId", None)
-    sig = data.get("SignatureValue", None)
-
-    if None in (amount, inv_id, sig):
-        return err("Required parameter not set: %s",
-                  "OutSum" if amount is None else
-                  ("InvId" if inv_id is None else "SignatureValue"))
+    if lib.conf("RK_RESULT_URL_METHOD") == "GET":
+        raw = req.GET
     else:
-        amount = Decimal(amount)
+        raw = req.POST
 
-    # Else verify signature
-    pass2 = settings.RK_MERCHANT_PASS2
-
-    our_sig = lib.sign([str(amount), inv_id, pass2])
-
-    if our_sig.lower() != sig.lower():
-        return err("Signature mismatch: %s", sig)
+    try:
+        data = lib.verify(raw)
+    except Exception as e:
+        return err(*e.args)
+    else:
+        amount = Decimal(data["amount"])
+        inv_id = data["inv_id"]
 
     # Check transaction
     try:
@@ -95,6 +82,8 @@ def result(req):
 
         log.info("Transaction %s paid", inv_id)
 
+        get_hook().on_result(tr)
+
         return HttpResponse("OK%s" % inv_id)
     except Transaction.DoesNotExist:
         return err("Transaction with id=%s not found", inv_id)
@@ -112,23 +101,17 @@ def success(req):
     * Culture
     """
 
-    data = req.GET if settings.RK_SUCCESS_URL_METHOD == "GET" else req.POST
+    if lib.conf("RK_RESULT_URL_METHOD") == "GET":
+        raw = req.GET
+    else:
+        raw = req.POST
 
-    amount = data.get("OutSum", None)
-    inv_id = data.get("InvId", None)
-    sig = data.get("SignatureValue", None)
-
-    if None in (amount, inv_id, sig):
-        return err("Required parameter not set: %s",
-                  "OutSum" if amount is None else
-                  ("InvId" if inv_id is None else "SignatureValue"))
-
-    # Else verify signature
-    pass2 = settings.RK_MERCHANT_PASS2
-    our_sig = lib.sign([amount, inv_id, pass2])
-
-    if our_sig != sig:
-        return err("Signature mismatch: %s != %s", sig, our_sig)
+    try:
+        data = lib.verify(raw)
+    except Exception as e:
+        return err(*e.args)
+    else:
+        inv_id = data["inv_id"]
 
     # Check transaction
     try:
@@ -138,7 +121,16 @@ def success(req):
             return err("Transaction amount mismatch: "\
                        "our=%s, their=%s", tr.amount, amount)
 
-        return HttpResponse("OK%s" % inv_id)
+        if not tr.completed:
+            log.error("Transaction is not completed on success step: %s",
+                      inv_id)
+            tr.completed = True
+            tr.date_paid = now()
+            tr.save()
+
+        get_hook().on_success(tr)
+
+        return HttpResponse("")
     except Transaction.DoesNotExist:
         return err("Transaction with id=%s not found", inv_id)
 
@@ -149,9 +141,17 @@ def fail(req):
     Payment failed
     """
 
-    log.info("FAILED")
+    if lib.conf("RK_RESULT_URL_METHOD") == "GET":
+        raw = req.GET
+    else:
+        raw = req.POST
 
-    return HttpResponse("failed")
+    amount = raw.get("OutSum", "")
+    inv_id = raw.get("InvId", "")
+
+    get_hook().on_fail(amount, inv_id)
+
+    return HttpResponse("")
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -160,3 +160,13 @@ def err(msg=None, *params):
         log.error(msg, *params)
 
     return HttpResponse("ERROR")
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+def get_hook():
+    try:
+        hook = lib.get_hook()
+    except Exception as e:
+        log.error("Unable to import hook: %s", e)
+
+        return RKBaseHook()
