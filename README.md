@@ -1,6 +1,6 @@
 # Overview
 
-django-rk is a django application for integrating with payment system
+django-rk is a django application for integrating payment system
 robokassa.ru.
 
 # Module settings
@@ -17,7 +17,6 @@ RK_SUCCESS_URL_METHOD = "GET"
 RK_FAIL_URL_METHOD = "GET"
 RK_SUCCESS_URL = "success case redirect"
 RK_FAIL_URL = "failure redirect"
-RK_HOOK_CLASS = "rk.hooks.RKBaseHook"
 RK_USE_TEST_SERVER = True
 ```
 
@@ -38,3 +37,16 @@ Fail URL: http://yourserver/{RK_URL_PREFIX}/fail
 ```
 
 3. Run manage.py syncdb && manage.py migrate rk
+
+# Signals
+
+There are several signals defined in the module rk.signals, which can be used
+to get notified on different events in transaction processing flow.
+
+To connect to one of these signal, use:
+
+```python
+from rk.signals import on_success
+
+on_success.connect(callback, dispatch_uid="my_id")
+```

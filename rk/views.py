@@ -15,7 +15,7 @@ from django.utils.timezone import now
 
 from rk import lib
 from models import Transaction
-from hooks import RKBaseHook
+import signals
 
 log = logging.getLogger(__name__)
 
@@ -31,7 +31,7 @@ def init(req):
     try:
         url = lib.init(data)
 
-        get_hook().on_init(data)
+        signals.on_init.send_robust(sender=__name__, post=data)
 
         return redirect(url)
     except Exception as e:
@@ -70,7 +70,7 @@ def result(req):
 
         if tr.amount != amount:
             return err("Transaction amount mismatch: "\
-                       "our=%s, their=%s", tr.amount, amount)
+                       "our=%s, their=%s", (tr.amount, amount))
 
         if tr.completed:
             return err("Transaction already completed: %s", inv_id)
@@ -82,7 +82,8 @@ def result(req):
 
         log.info("Transaction %s paid", inv_id)
 
-        get_hook().on_result(tr)
+        signals.on_transaction_created.send_robust(sender=__name__,
+                                                   transaction=tr)
 
         return HttpResponse("OK%s" % inv_id)
     except Transaction.DoesNotExist:
@@ -128,7 +129,7 @@ def success(req):
             tr.date_paid = now()
             tr.save()
 
-        get_hook().on_success(tr)
+        signals.on_success.send_robust(sender=__name__, transaction=tr)
 
         return HttpResponse("")
     except Transaction.DoesNotExist:
@@ -149,7 +150,8 @@ def fail(req):
     amount = raw.get("OutSum", "")
     inv_id = raw.get("InvId", "")
 
-    get_hook().on_fail(amount, inv_id)
+    signals.on_success.send_robust(sender=__name__, amount=amount,
+                                   inv_id=inv_id)
 
     return HttpResponse("")
 
@@ -159,14 +161,7 @@ def err(msg=None, *params):
     if msg is not None:
         log.error(msg, *params)
 
+        signals.on_transaction_failed.send_robust(sender=__name__,
+                                                  error_msg=msg % *params)
+
     return HttpResponse("ERROR")
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-def get_hook():
-    try:
-        hook = lib.get_hook()
-    except Exception as e:
-        log.error("Unable to import hook: %s", e)
-
-        return RKBaseHook()

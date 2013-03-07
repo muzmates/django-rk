@@ -15,7 +15,6 @@ __all__ = ["conf",
            "init",
            "sign",
            "verify",
-           "get_hook"
            ]
 
 def conf(val):
@@ -112,23 +111,3 @@ def verify(data):
         raise Exception("Signature mismatch: %s != %s", sig, our_sig)
     else:
         return {"amount": amount, "inv_id": inv_id}
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-def get_hook():
-    """
-    Get registered hook instance
-    """
-
-    hook_data = conf("RK_HOOK_CLASS").split(".")
-    hook_package = ".".join(hook_data[:-1])
-    hook_class = hook_data[-1]
-
-    module = __import__(hook_package, globals(), locals(), [hook_class], -1)
-
-    inst = getattr(module, hook_class)()
-
-    if not isinstance(inst, RKBaseHook):
-        raise Exception("Class %s doesn't extend RKBaseHook", hook_data)
-    else:
-        return inst
