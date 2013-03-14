@@ -162,6 +162,6 @@ def err(msg=None, *params):
         log.error(msg, *params)
 
         signals.on_transaction_failed.send_robust(sender=__name__,
-                                                  error_msg=msg % *params)
+                                                  error_msg=msg % params)
 
     return HttpResponse("ERROR")
