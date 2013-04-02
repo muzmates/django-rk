@@ -7,8 +7,7 @@
 from django.conf.urls import patterns, include, url
 
 urlpatterns = patterns('rk.views',
-    url(r'^init/$', 'init'),
     url(r'^result/$', 'result'),
     url(r'^success/$', 'success'),
-    url(r'^fail/$', 'fail'),
+    url(r'^cancel/$', 'cancel'),
 )
