@@ -26,3 +26,8 @@ class Transaction(models.Model):
                                    help_text=_("Arbitrary payment notes"))
 
     completed = models.BooleanField(default=False)
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    def __unicode__(self):
+        return u"RK Transaction: %d %s" % self.id

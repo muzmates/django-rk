@@ -10,7 +10,6 @@ from django.http import HttpResponseNotAllowed, HttpResponseBadRequest
 from django.shortcuts import render, redirect
 from django.conf import settings
 from django.http import HttpResponse
-from django.contrib.auth.decorators import login_required
 from django.utils.timezone import now
 
 from rk import lib, ex
