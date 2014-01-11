@@ -30,4 +30,4 @@ class Transaction(models.Model):
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     def __unicode__(self):
-        return u"RK Transaction: %d %s" % self.id
+        return u"RK Transaction: %d %s" % (self.id, self.amount)
