@@ -6,9 +6,6 @@
 
 from decimal import Decimal
 
-from django.http import HttpResponseNotAllowed, HttpResponseBadRequest
-from django.shortcuts import render, redirect
-from django.conf import settings
 from django.http import HttpResponse
 from django.utils.timezone import now
 
@@ -17,8 +14,6 @@ from models import Transaction
 
 def return_err():
     return HttpResponse("ERROR")
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 def result(req):
     """
@@ -74,11 +69,9 @@ def result(req):
 
         return return_err()
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 def success(req):
     """
-    Payment succeeded
+    User returned from robokassa
 
     Following params are passed:
     * OutSum
@@ -111,18 +104,14 @@ def success(req):
         if tr.amount != amount:
             raise ex.ResponseDataMismatch("amount")
 
-        if tr.completed:
-            tr.completed = True
-            tr.date_paid = now()
-            tr.save()
+        if not tr.completed:
+            raise ex.TransactionIsNotCompleted(tr)
 
         return successf(req, tr)
     except Transaction.DoesNotExist:
         return failuref(req, tr, ex.TransactionNotFound())
     except Exception as e:
         return failuref(req, tr, e)
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 def cancel(req):
     """

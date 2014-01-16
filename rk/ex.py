@@ -11,8 +11,6 @@ class RKException(Exception):
 
     pass
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 class ResponseMissingData(RKException):
     """
     Some data fields are missing in API response
@@ -21,8 +19,6 @@ class ResponseMissingData(RKException):
     """
 
     pass
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class ResponseDataMismatch(RKException):
     """
@@ -33,8 +29,6 @@ class ResponseDataMismatch(RKException):
 
     pass
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 class SignatureMismatch(RKException):
     """
     Signature mismatch
@@ -43,8 +37,6 @@ class SignatureMismatch(RKException):
     """
 
     pass
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class TransactionIsCompleted(RKException):
     """
@@ -55,7 +47,14 @@ class TransactionIsCompleted(RKException):
 
     pass
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+class TransactionIsNotCompleted(RKException):
+    """
+    Transaction is not completed, while it should be
+
+    Argument: Transaction instance
+    """
+
+    pass
 
 class TransactionNotFound(RKException):
     """
