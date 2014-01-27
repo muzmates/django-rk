@@ -20,7 +20,9 @@ RK_RESULT_ERROR_CALLBACK = lambda req, tr, err: None
 RK_SUCCESS_CALLBACK = lambda req, tr: HttpResponse()
 RK_ERROR_CALLBACK = lambda req, tr, err: HttpResponse()
 RK_CANCEL_CALLBACK = lambda req, amount, order_id: HttpResponse()
+RK_SSL_CA_CERT_PATH = "/etc/ssl/certs/ca-certificates.crt"
 
-## Robokassa URL
+## Robokassa URLs
 RK_URL = "https://auth.robokassa.ru/Merchant/Index.aspx"
 RK_TEST_URL = "http://test.robokassa.ru/Index.aspx"
+RK_MERCHANT_URL = "https://merchant.roboxchange.com/WebService/Service.asmx"
