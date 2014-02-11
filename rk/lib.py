@@ -107,14 +107,14 @@ def get_currencies(language="en"):
         for group in root.findall("%s/%s" % (ns("Groups"), ns("Group"))):
             gr = {"code": group.attrib.get("Code", None),
                   "description": group.attrib.get("Description", None),
-                  "data": {}
+                  "data": []
                   }
 
             items = group.find(ns("Items"))
 
             for currency in items.findall(ns("Currency")):
-                gr["data"]["label"] = currency.get("Label", None)
-                gr["data"]["name"] = currency.get("Name", None)
+                gr["data"].append({"label": currency.get("Label", None),
+                                   "name": currency.get("Name", None)})
 
             result.append(gr)
 
