@@ -34,7 +34,7 @@ def init(amount, currency=None, email="", description="", language=None):
     pass1 = lib.conf("RK_MERCHANT_PASS1")
 
     # 2. Create transaction in DB
-    tr = Transaction(amount=amount, description=description)
+    tr = Transaction(amount=amount, currency=currency, description=description)
     tr.save()
     _id = tr.id
 

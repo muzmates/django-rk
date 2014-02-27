@@ -8,13 +8,6 @@ from django.conf import settings
 
 import defaults
 
-__all__ = ["conf",
-           "sign",
-           "verify",
-           "get_merchant_url",
-           "get_currencies",
-           ]
-
 def conf(val):
     """
     Get configuration param
@@ -64,59 +57,38 @@ def get_merchant_url(method):
 
     return "%s/%s" % (conf("RK_MERCHANT_URL"), method)
 
-def get_currencies(language="en"):
+def get_out_sum(amount2pay, currency):
     """
-    Get available currencies
-
-    Returns list of group dicts:
-
-    [{"code": string(),
-      "description": string(),
-      "data": {"label": string(), "name": string()}}]
+    Get amount to pay including the RK fee
     """
 
     import urllib
     import urllib2
-    import xml.etree.ElementTree as ET
 
+    import xml.etree.ElementTree as ET
     from contextlib import closing
     from https_connection import build_opener
 
-    ns = lambda tag: "{%s}%s" % ("http://merchant.roboxchange.com/WebService/", tag)
+    def ns(tag):
+        return "{%s}%s" % ("http://merchant.roboxchange.com/WebService/", tag)
 
     params = {
         "MerchantLogin": conf("RK_MERCHANT_LOGIN"),
-        "Language": language
+        "IncCurrLabel": currency,
+        "IncSum": amount2pay,
     }
 
-    req = urllib2.Request(get_merchant_url("GetCurrencies"),
-                          urllib.urlencode(params))
+    req = urllib2.Request("%s?%s" % (get_merchant_url("CalcOutSumm"),
+                                     urllib.urlencode(params)))
 
     opener = build_opener()
 
     with closing(opener.open(req)) as stream:
-        result = []
-
         xml = stream.read()
         root = ET.fromstring(xml)
         code = root.find("%s/%s" % (ns("Result"), ns("Code"))).text
 
         if code != "0":
-            raise Exception("Call failed: code=%s,xml=%s" % str(code), str(xml))
+            raise Exception("Call failed: code=%s,xml=%s" % (str(code), str(xml)))
 
-        for group in root.findall("%s/%s" % (ns("Groups"), ns("Group"))):
-            gr = {"code": group.attrib.get("Code", None),
-                  "description": group.attrib.get("Description", None),
-                  "data": []
-                  }
-
-            items = group.find(ns("Items"))
-
-            for currency in items.findall(ns("Currency")):
-                gr["data"].append({"label": currency.get("Label", None),
-                                   "name": currency.get("Name", None)})
-
-            result.append(gr)
-
-        return result
-
+        return float(root.find("%s" % ns("OutSum")).text)

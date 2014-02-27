@@ -5,7 +5,6 @@
 ##
 
 from django.db import models
-from django.utils.translation import ugettext_lazy as _
 
 class Transaction(models.Model):
     """
@@ -13,21 +12,24 @@ class Transaction(models.Model):
     """
 
     amount = models.DecimalField(max_digits=15, decimal_places=2,
-                                 help_text=_("Payment amount"))
+                                 help_text="Payment amount")
 
     date_created = models.DateTimeField(auto_now_add=True,
-                                        help_text=_("Creation date"))
+                                        help_text="Creation date")
 
-    date_paid = models.DateTimeField(help_text=_("Payment date"),
+    date_paid = models.DateTimeField(help_text="Payment date",
                                      default=None,
                                      null=True)
 
     description = models.TextField(max_length=100,
-                                   help_text=_("Arbitrary payment notes"))
+                                   help_text="Arbitrary payment notes")
 
     completed = models.BooleanField(default=False)
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    currency = models.CharField(max_length=20,
+                                default=None,
+                                blank=True,
+                                null=True)
 
     def __unicode__(self):
         return u"RK Transaction: %d %s" % (self.id, self.amount)
