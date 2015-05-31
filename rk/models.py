@@ -11,6 +11,9 @@ class Transaction(models.Model):
     Payment transactions
     """
 
+    class Meta:
+        app_label = "rk"
+
     amount = models.DecimalField(max_digits=15, decimal_places=2,
                                  help_text="Payment amount")
 
