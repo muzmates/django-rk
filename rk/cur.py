@@ -6,7 +6,7 @@
 
 WMR = "WMRM"
 CARD = "BANKOCEAN2R"
-YANDEX_MONEY = "YandexMerchantR"
+YANDEX_MONEY = "YandexMerchantOceanR"
 QIWI = "Qiwi30OceanR"
 MEGAFON = "MegafonR"
 MTS = "MobicomMtsR"
