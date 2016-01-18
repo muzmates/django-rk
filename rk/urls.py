@@ -4,10 +4,12 @@
 ## muzmates.com 2013
 ##
 
-from django.conf.urls import patterns, include, url
+from django.conf.urls import url
 
-urlpatterns = patterns('rk.views',
-    url(r'^result/$', 'result'),
-    url(r'^success/$', 'success'),
-    url(r'^cancel/$', 'cancel'),
-)
+import views
+
+urlpatterns = [
+    url(r'^result/$', views.result),
+    url(r'^success/$', views.success),
+    url(r'^cancel/$', views.cancel),
+]

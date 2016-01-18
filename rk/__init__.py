@@ -8,8 +8,6 @@ import urllib
 
 import lib
 
-from models import Transaction
-
 def init(amount, currency=None, email="", description="", language=None):
     """
     Init payment
@@ -23,6 +21,8 @@ def init(amount, currency=None, email="", description="", language=None):
 
     Return tuple (rk.models.Transaction instance, robokassa redirect URL)
     """
+
+    from models import Transaction
 
     if amount is None:
         return None
