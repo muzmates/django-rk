@@ -4,7 +4,7 @@
 ## muzmates.com 2013
 ##
 
-WMR = "WMRM"
+WMR = "WMROM"
 CARD = "BANKOCEAN2R"
 YANDEX_MONEY = "YandexMerchantOceanR"
 QIWI = "Qiwi30OceanR"
