@@ -4,9 +4,9 @@
 ## muzmates.com 2013
 ##
 
-WMR = "WMROM"
+WMR = "WMRRM"
 CARD = "BANKOCEAN3R"
-YANDEX_MONEY = "YandexMerchantOceanR"
-QIWI = "Qiwi30OceanR"
+YANDEX_MONEY = "YandexMerchantRIBR"
+QIWI = "Qiwi40RIBRM"
 MEGAFON = "MegafonR"
 MTS = "MobicomMtsR"
